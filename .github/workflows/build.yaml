@@ -67,6 +67,7 @@ jobs:
           else
             artifact_file="haax-dbc"
           fi
+          ls
           curl \
             -X POST \
             -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
