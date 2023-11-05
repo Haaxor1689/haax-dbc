@@ -26,6 +26,11 @@ jobs:
       - name: Build the project
         run: npm run bundle
 
+      - name: Set Git User
+        run: |
+          git config --global user.email "${{ GITHUB_EMAIL }}"
+          git config --global user.name "${{ GITHUB_ACTOR }}"
+
       - name: Check if tag exists
         id: check_tag
         run: |
