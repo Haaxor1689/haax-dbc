@@ -59,7 +59,7 @@ jobs:
 
       - name: Create Release and Upload Artifacts
         run: |
-          version=$(node -e "console.log(require('./package.json').version")
+          version=$(node -e "console.log(require('./package.json').version)")
           if [ "${{ steps.check_release.outputs.response_code }}" != "200" ]; then
             # Release doesn't exist, so create it
             echo "Creating release for version $version"
