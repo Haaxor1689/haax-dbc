@@ -1,0 +1,67 @@
+name: Build and Release
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-release:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os:
+          - windows-latest
+          - ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: 16
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build the project
+        run: npm run bundle
+
+      - name: Check if tag exists
+        id: check_tag
+        run: |
+          version=$(node -e "console.log(require('./package.json').version")
+          tag_exists=$(git ls-remote --tags origin "refs/tags/v$version")
+          if [ -z "$tag_exists" ]; then
+            echo "Tag does not exist. Creating tag..."
+            git tag -a -m "Tag for version $version" "v$version"
+            git push origin "v$version"
+          else
+            echo "Tag v$version already exists."
+          fi
+
+      - name: Create Release
+        id: create_release
+        run: |
+          version=$(node -e "console.log(require('./package.json').version)")
+          echo "Creating release for version $version"
+          curl \
+            -X POST \
+            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            -d "{\"tag_name\": \"v$version\", \"name\": \"Release $version\"}" \
+            "https://api.github.com/repos/${{ github.repository }}/releases"
+
+      - name: Upload Artifacts
+        run: |
+          version=$(node -e "console.log(require('./package.json').version)")
+          echo "Uploading artifacts for version $version"
+          artifact_file="haax-mpq${{ matrix.os == 'windows-latest' ? '.exe' : '' }}"
+          curl \
+            -X POST \
+            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Content-Type: application/octet-stream" \
+            --data-binary @"./$artifact_file" \
+            "https://uploads.github.com/repos/${{ github.repository }}/releases/${{ steps.create_release.outputs.id }}/assets?name=$artifact_file"
