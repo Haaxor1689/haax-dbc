@@ -43,6 +43,7 @@ jobs:
           else
             echo "Tag v$version already exists."
           fi
+        shell: bash
 
       - name: Create Release
         id: create_release
@@ -55,15 +56,16 @@ jobs:
             -H "Content-Type: application/json" \
             -d "{\"tag_name\": \"v$version\", \"name\": \"Release $version\"}" \
             "https://api.github.com/repos/${{ github.repository }}/releases"
+        shell: bash
 
       - name: Upload Artifacts
         run: |
           version=$(node -e "console.log(require('./package.json').version)")
           echo "Uploading artifacts for version $version"
           if [ "${{ matrix.os }}" == "windows-latest" ]; then
-            artifact_file="haax-mpq.exe"
+            artifact_file="haax-dbc.exe"
           else
-            artifact_file="haax-mpq"
+            artifact_file="haax-dbc"
           fi
           curl \
             -X POST \
@@ -71,3 +73,4 @@ jobs:
             -H "Content-Type: application/octet-stream" \
             --data-binary @"./$artifact_file" \
             "https://uploads.github.com/repos/${{ github.repository }}/releases/${{ steps.create_release.outputs.id }}/assets?name=$artifact_file"
+        shell: bash
