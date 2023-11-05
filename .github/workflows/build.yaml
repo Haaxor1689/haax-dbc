@@ -58,7 +58,7 @@ jobs:
         run: |
           version=$(node -e "console.log(require('./package.json').version)")
           echo "Uploading artifacts for version $version"
-          artifact_file="haax-mpq${{ matrix.os == 'windows-latest' ? '.exe' : '' }}"
+          artifact_file="haax-dbc${{ matrix.os == 'windows-latest' ? '.exe' : '' }}"
           curl \
             -X POST \
             -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
