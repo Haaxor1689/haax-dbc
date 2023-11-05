@@ -29,7 +29,7 @@ jobs:
       - name: Check if tag exists
         id: check_tag
         run: |
-          version=$(node -e "console.log(require('./package.json').version")
+          version=$(node -e "console.log(require('./package.json').version)")
           tag_exists=$(git ls-remote --tags origin "refs/tags/v$version")
           if [ -z "$tag_exists" ]; then
             echo "Tag does not exist. Creating tag..."
