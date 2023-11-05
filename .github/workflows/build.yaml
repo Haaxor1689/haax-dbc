@@ -40,6 +40,7 @@ jobs:
           else
             echo "Tag v$version already exists."
           fi
+          echo "::set-output name=tag_name::v$version"
         shell: bash
 
       - name: Determine Artifact File
@@ -56,3 +57,4 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           files: ${{ steps.determine_artifact.outputs.artifact_file }}
+          tag_name: ${{ steps.check_tag.outputs.tag_name }}
