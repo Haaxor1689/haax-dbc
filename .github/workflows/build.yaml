@@ -49,30 +49,35 @@ jobs:
           fi
         shell: bash
 
-      - name: Check if Release Exists
-        id: check_release
+      - name: Create or Get Release
+        id: create_or_get_release
         run: |
           version="${{ steps.get_version.outputs.version }}"
           response=$(curl -s -o /dev/null -w "%{http_code}" "https://api.github.com/repos/${{ github.repository }}/releases/tags/v$version")
           if [ $response -eq 200 ]; then
             echo "Release v$version already exists."
+            release_id=$(curl -s "https://api.github.com/repos/${{ github.repository }}/releases/tags/v$version" | jq -r .id)
           else
             echo "Release v$version does not exist. Creating release..."
-            # Create the release
             release_id=$(curl -X POST -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" -d "{\"tag_name\": \"v$version\"}" "https://api.github.com/repos/${{ github.repository }}/releases" | jq -r .id)
-            echo "::set-output name=release_id::$release_id"
           fi
+          echo "::set-output name=release_id::$release_id"
         shell: bash
 
       - name: Upload Artifact to Release
-        if: steps.check_release.outputs.release_id
         run: |
           version="${{ steps.get_version.outputs.version }}"
-          release_id="${{ steps.check_release.outputs.release_id }}"
+          release_id="${{ steps.create_or_get_release.outputs.release_id }}"
           if [ "${{ matrix.os }}" == "windows-latest" ]; then
             artifact_file="haax-dbc.exe"
           else
             artifact_file="haax-dbc"
           fi
+          existing_asset_id=$(curl -s "https://api.github.com/repos/${{ github.repository }}/releases/$release_id/assets" | jq -r ".[] | select(.name == \"$artifact_file\").id")
+          if [ -n "$existing_asset_id" ]; then
+            echo "Updating existing artifact: $artifact_file"
+            curl -X DELETE -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" "https://api.github.com/repos/${{ github.repository }}/releases/assets/$existing_asset_id"
+          fi
+          echo "Uploading artifact: $artifact_file"
           curl -X POST -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" -H "Content-Type: application/octet-stream" --data-binary @"$artifact_file" "https://uploads.github.com/repos/${{ github.repository }}/releases/$release_id/assets?name=$artifact_file"
         shell: bash
