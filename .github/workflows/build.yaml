@@ -31,10 +31,14 @@ jobs:
           git config --global user.email "actions@github.com"
           git config --global user.name "${{ github.actor }}"
 
-      - name: Check if tag exists
+      - name: Get Current Version
+        id: get_version
+        run: echo "::set-output name=version::$(node -e 'console.log(require("./package.json").version)')"
+
+      - name: Check if Tag Exists
         id: check_tag
         run: |
-          version=$(node -e "console.log(require('./package.json').version)")
+          version="${{ steps.get_version.outputs.version }}"
           tag_exists=$(git ls-remote --tags origin "refs/tags/v$version")
           if [ -z "$tag_exists" ]; then
             echo "Tag does not exist. Creating tag..."
@@ -45,42 +49,30 @@ jobs:
           fi
         shell: bash
 
-      - name: Check if release exists
+      - name: Check if Release Exists
         id: check_release
         run: |
-          version=$(node -e "console.log(require('./package.json').version)")
+          version="${{ steps.get_version.outputs.version }}"
           response=$(curl -s -o /dev/null -w "%{http_code}" "https://api.github.com/repos/${{ github.repository }}/releases/tags/v$version")
           if [ $response -eq 200 ]; then
             echo "Release v$version already exists."
           else
             echo "Release v$version does not exist. Creating release..."
-            echo "::set-output name=release_exists::false"  # Set an output variable to indicate release does not exist
+            # Create the release
+            release_id=$(curl -X POST -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" -d "{\"tag_name\": \"v$version\"}" "https://api.github.com/repos/${{ github.repository }}/releases" | jq -r .id)
+            echo "::set-output name=release_id::$release_id"
           fi
         shell: bash
 
-      - name: Create Release and Upload Artifacts
-        id: create_release
-        if: steps.check_release.outputs.release_exists != 'false'
+      - name: Upload Artifact to Release
+        if: steps.check_release.outputs.release_id
         run: |
-          version=$(node -e "console.log(require('./package.json').version)")
-          echo "Creating release for version $version"
-          curl \
-            -X POST \
-            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-            -H "Content-Type: application/json" \
-            -d "{\"tag_name\": \"v$version\", \"name\": \"Release $version\"}" \
-            "https://api.github.com/repos/${{ github.repository }}/releases"
-
-          # Upload artifacts
-          echo "Uploading artifacts for version $version"
+          version="${{ steps.get_version.outputs.version }}"
+          release_id="${{ steps.check_release.outputs.release_id }}"
           if [ "${{ matrix.os }}" == "windows-latest" ]; then
             artifact_file="haax-dbc.exe"
           else
             artifact_file="haax-dbc"
           fi
-          curl \
-            -X POST \
-            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-            -H "Content-Type: application/octet-stream" \
-            --data-binary @"$artifact_file" \
-            "https://uploads.github.com/repos/${{ github.repository }}/releases/$(curl -s "https://api.github.com/repos/${{ github.repository }}/releases/tags/v$version" | jq -r .id)/assets?
+          curl -X POST -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" -H "Content-Type: application/octet-stream" --data-binary @"$artifact_file" "https://uploads.github.com/repos/${{ github.repository }}/releases/$release_id/assets?name=$artifact_file"
+        shell: bash
