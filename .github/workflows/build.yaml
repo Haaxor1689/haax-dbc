@@ -33,7 +33,15 @@ jobs:
 
       - name: Get Current Version
         id: get_version
-        run: echo "::set-output name=version::$(node -e 'console.log(require("./package.json").version)')"
+        run: |
+          if [ "${{ runner.os }}" == "Windows" ]; then
+            version=$(Get-Content -Path package.json | ConvertFrom-Json | Select-Object -ExpandProperty version)
+            echo "::set-output name=version::$version"
+          else
+            version=$(node -e 'console.log(require("./package.json").version)')
+            echo "::set-output name=version::$version"
+          fi
+        shell: bash
 
       - name: Check if Tag Exists
         id: check_tag
