@@ -12,11 +12,4 @@ haax-dbc <...filePaths>
 
 ## Executable
 
-You can also use this CLI as a standalone executable. Run these scripts after cloning to generate it:
-
-```
-pnpm i
-pnpm run bundle
-```
-
-This will create a `haax-dbc` executable in the root of this repository. You can then drag & drop any files you want converted onto the executable.
+You can also use this CLI as a standalone executable. Download `haax-dbc.exe` for Windows or `haax-dbc` for Linux. You can then drag & drop any files you want converted onto the executable.
