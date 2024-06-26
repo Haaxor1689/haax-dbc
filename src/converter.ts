@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
-import Logger, { getTimeElapsed } from './logger';
+import Logger from './logger';
 import Dbc, { isDbc } from './dbc';
 import { csvToData, dataToCsv } from './utils';
 
