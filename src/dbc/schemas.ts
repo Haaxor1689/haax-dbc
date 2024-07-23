@@ -1099,6 +1099,11 @@ export const SpellVisualPrecastTransitions = DbcSchema({
   holdAnimation: StringRefSchema
 });
 
+export const StableSlotPrices = DbcSchema({
+  id: n.int32(),
+  cost: n.int32()
+});
+
 export const Startup_Strings = DbcSchema({
   id: n.int32(),
   name: StringRefSchema,

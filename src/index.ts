@@ -7,6 +7,8 @@ import path from 'node:path';
 import Logger from './logger';
 import { csvToDbc, dbcToCsv } from './converter';
 
+console.log(`Running haax-dbc v${require('../package.json').version}`);
+
 const args = process.argv.slice(2);
 if (args.length === 0) {
   console.log('Incorrect number of arguments passed');
