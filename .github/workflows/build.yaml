@@ -15,21 +15,21 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
         with:
-          node-version: 16
+          bun-version: latest
 
       - name: Install dependencies
-        run: npm install
+        run: bun install
 
       - name: Build the project
-        run: npm run bundle
+        run: bun run bundle
 
       - name: Check if Tag Exists
         id: check_tag
         run: |
-          version=$(node -e "console.log(require('./package.json').version)")
+          version=$(bun -e "console.log(require('./package.json').version)")
           tag_exists=$(git ls-remote --tags origin "refs/tags/v$version")
           if [ -z "$tag_exists" ]; then
             echo "Tag does not exist. Creating tag..."

@@ -1,6 +1,6 @@
 {
   "name": "haax-dbc",
-  "version": "1.0.2",
+  "version": "1.1.0",
   "author": "Haaxor1689",
   "license": "MIT",
   "repository": {
@@ -14,7 +14,7 @@
   ],
   "scripts": {
     "dev": "bun run src/index.ts",
-    "bundle": "bun build ./src/index.ts --compile --outfile haax-dbc"
+    "bundle": "bun build ./src/index.ts --compile --minify --outfile haax-dbc"
   },
   "devDependencies": {
     "@types/bun": "^1.2.4",
