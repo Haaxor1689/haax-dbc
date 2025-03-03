@@ -5,8 +5,8 @@ import { mapValues } from '../utils';
 type StringRef = { _t: 'str'; offset: number };
 
 export const StringRefSchema = n.int32().transform(
-  v => ({ _t: 'str', offset: v } as StringRef),
-  v => v.offset
+  ctx => ({ _t: 'str', offset: ctx.value } as StringRef),
+  ctx => ctx.value.offset
 );
 
 type StringRefSchema = n.output<typeof StringRefSchema>;
@@ -26,13 +26,13 @@ export const Position = {
 
 const Languages = [
   'enUS',
-  'enGB',
   'koKR',
   'frFR',
   'deDE',
   'enCN',
-  'zhCN',
-  'enTW'
+  'enTW',
+  'esES',
+  'esMX'
 ] as const;
 
 export const LocalizedStringRef = <T extends string>(key: T) =>
@@ -76,25 +76,42 @@ export const DbcSchema = <T extends n.NilRawShape>(schema: T) =>
       stringBlock: n.buffer(['stringBlockSize'])
     })
     .transform(
-      ({ records, stringBlock }) =>
-        records.map(r =>
+      ctx => {
+        const { records, stringBlock } = ctx.value;
+
+        const decoder = new TextDecoder();
+        const strings = new Map<number, string>();
+        let current = 0;
+        while (current < stringBlock.length) {
+          const end = stringBlock.indexOf(0, current);
+          strings.set(
+            current,
+            decoder.decode(
+              stringBlock.subarray(current, end === -1 ? undefined : end)
+            )
+          );
+          current = end + 1;
+        }
+        return records.map(r =>
           mapValues(r, v => {
             if (!isStringRef(v)) return v;
-            // Read from string block
-            const str = stringBlock.slice(v.offset);
-            return new TextDecoder().decode(str.slice(0, str.indexOf(0)));
+            return strings.get(v.offset) ?? '';
           })
-        ) as ToStringRef<n.objectOutputType<T>>[],
-      val => {
-        let stringBlock = '\0';
-        const records = val.map(r =>
+        ) as ToStringRef<n.objectOutputType<T>>[];
+      },
+      ctx => {
+        // TODO: Optimize this
+        let stringBlock = Buffer.alloc(1);
+        const records = ctx.value.map(r =>
           mapValues(r, v => {
             if (typeof v !== 'string') return v;
             if (!v) return { _type: 'stringRef', offset: 0 };
-            const idx = stringBlock.indexOf(`\0${v}\0`);
+            const searchBuffer = Buffer.from(`\0${v}\0`);
+            const idx = stringBlock.indexOf(searchBuffer);
             if (idx !== -1) return { _type: 'stringRef', offset: idx + 1 };
             const offset = stringBlock.length;
-            stringBlock += `${v}\0`;
+            const newString = Buffer.from(`${v}\0`);
+            stringBlock = Buffer.concat([stringBlock, newString]);
             return { _type: 'stringRef', offset };
           })
         ) as [];
@@ -106,7 +123,7 @@ export const DbcSchema = <T extends n.NilRawShape>(schema: T) =>
           recordSize: fieldCount * 4,
           stringBlockSize: stringBlock.length,
           records,
-          stringBlock: new TextEncoder().encode(stringBlock)
+          stringBlock
         };
       }
     );

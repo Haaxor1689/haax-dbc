@@ -7,6 +7,3 @@ export const getTimeElapsed = (startDate: Date, endDate = new Date()) => {
   ms %= 1000;
   return `${m ? `${pad(m)}:` : ''}${pad(s)}.${pad(ms, 3)}`;
 };
-
-const Logger = console;
-export default Logger;
