@@ -14,6 +14,7 @@ export const mapValues = <T, U>(
 };
 
 export const dataToCsv = (data: Record<string, unknown>[]) => {
+  if (data.length === 0) return '';
   return [
     Object.keys(data[0]),
     ...data.map(r =>
