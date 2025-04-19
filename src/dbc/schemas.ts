@@ -252,9 +252,8 @@ export const CreatureFamily = DbcSchema({
   minScaleLevel: n.int32(),
   maxScale: n.float(),
   maxScaleLevel: n.int32(),
+  ...ArrayField('skillLine', n.int32(), 2),
   petFoodMask: n.int32(),
-  petTalentType: n.int32(),
-  categoryEnumId: n.int32(),
   ...LocalizedStringRef('name'),
   iconFile: StringRefSchema
 });
@@ -472,9 +471,9 @@ export const GroundEffectTexture = DbcSchema({
 
 export const HelmetGeosetVisData = DbcSchema({
   id: n.int32(),
-  hairRaceMask: n.int32(),
-  ...ArrayField('facialRaceMask', n.int32(), 3),
-  earsRaceMask: n.int32()
+  hairRaceMask: n.uint32(),
+  ...ArrayField('facialRaceMask', n.uint32(), 3),
+  earsRaceMask: n.uint32()
 });
 
 export const ItemBagFamily = DbcSchema({
