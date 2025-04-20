@@ -4,19 +4,13 @@ import { mapValues } from '../utils';
 
 type StringRef = { _t: 'str'; offset: number };
 
-export const StringRefSchema = n.int32().transform(
+export const StringRefSchema: n.NilString = n.int32().transform(
   ctx => ({ _t: 'str', offset: ctx.value } as StringRef),
   ctx => ctx.value.offset
-);
+) as never;
 
-type StringRefSchema = n.output<typeof StringRefSchema>;
-
-type ToStringRef<T> = {
-  [K in keyof T]: T[K] extends StringRefSchema ? string : T[K];
-};
-
-const isStringRef = (obj: unknown): obj is StringRefSchema =>
-  !!obj && typeof obj === 'object' && '_t' in obj && obj._t === 'str';
+const isStringRef = (obj: unknown): obj is StringRef =>
+  (obj as any)?._t === 'str';
 
 export const Position = {
   x: n.float(),
@@ -32,15 +26,22 @@ const Languages = [
   'enCN',
   'enTW',
   'esES',
-  'esMX'
+  'ptPT'
 ] as const;
 
-export const LocalizedStringRef = <T extends string>(key: T) =>
+type StringRefReturn<T extends string> = Record<
+  `${T}_${(typeof Languages)[number]}`,
+  typeof StringRefSchema
+> &
+  Record<`${T}Mask`, n.NilNumber>;
+
+export const LocalizedStringRef = <T extends string>(
+  key: T
+): StringRefReturn<T> =>
   Object.fromEntries([
     ...Languages.map(l => [`${key}_${l}`, StringRefSchema]),
     [`${key}Mask`, n.int32()]
-  ]) as Record<`${T}_${(typeof Languages)[number]}`, typeof StringRefSchema> &
-    Record<`${T}Mask`, n.NilNumber>;
+  ]) as never;
 
 type NumbersVariant<
   N extends number,
@@ -57,12 +58,14 @@ export const ArrayField = <
   key: T,
   schema: S,
   count: N
-) =>
+): Record<`${T}_${NumbersVariant<N>}`, S> =>
   Object.fromEntries(
     [...Array(count).keys()].map(i => [`${key}_${i + 1}`, schema])
-  ) as Record<`${T}_${NumbersVariant<N>}`, S>;
+  ) as never;
 
-export const DbcSchema = <T extends n.NilRawShape>(schema: T) =>
+export const DbcSchema = <T extends n.NilRawShape>(
+  schema: T
+): n.NilArray<n.NilObject<T>> =>
   n
     .object({
       signature: n.string(4),
@@ -97,7 +100,7 @@ export const DbcSchema = <T extends n.NilRawShape>(schema: T) =>
             if (!isStringRef(v)) return v;
             return strings.get(v.offset) ?? '';
           })
-        ) as ToStringRef<n.objectOutputType<T>>[];
+        );
       },
       ctx => {
         // TODO: Optimize this
@@ -126,4 +129,4 @@ export const DbcSchema = <T extends n.NilRawShape>(schema: T) =>
           stringBlock
         };
       }
-    );
+    ) as never;

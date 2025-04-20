@@ -1,6 +1,6 @@
 {
   "name": "haax-dbc",
-  "version": "1.1.4",
+  "version": "1.2.0",
   "author": "Haaxor1689",
   "license": "MIT",
   "repository": {
@@ -8,20 +8,31 @@
     "url": "https://github.com/Haaxor1689/haax-dbc.git"
   },
   "main": "./dist/index.js",
-  "bin": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "require": "./dist/index.js",
+      "import": "./dist/index.mjs",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "bin": "./dist/index.cjs",
   "files": [
     "dist/**/*"
   ],
   "scripts": {
     "dev": "bun run src/index.ts",
-    "bundle": "bun build ./src/index.ts --compile --minify --outfile haax-dbc"
+    "bundle": "bun build ./src/index.ts --compile --minify --outfile haax-dbc",
+    "build": "tsup src/dbc/index.ts --format esm,cjs --dts --minify"
   },
   "devDependencies": {
     "@types/bun": "^1.2.4",
-    "typescript": "^5.8.2"
+    "typescript": "^5.8.2",
+    "tsup": "^6.7.0"
   },
   "dependencies": {
-    "@haaxor1689/nil": "^1.0.0",
+    "@haaxor1689/nil": "^1.0.3",
     "anymatch": "^3.1.3",
     "commander": "^11.1.0"
   }
