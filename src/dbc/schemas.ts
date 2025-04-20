@@ -24,7 +24,7 @@ export const AreaPOI = DbcSchema({
   icon: n.int32(),
   factionId: n.int32(),
   ...Position,
-  continentId: n.int32(),
+  mapId: n.int32(),
   flags: n.int32(),
   areaId: n.int32(),
   ...LocalizedStringRef('name'),
@@ -34,7 +34,7 @@ export const AreaPOI = DbcSchema({
 
 export const AreaTable = DbcSchema({
   id: n.int32(),
-  continentId: n.int32(),
+  mapId: n.int32(),
   parentAreaId: n.int32(),
   areaBit: n.int32(),
   flags: n.int32(),
@@ -56,7 +56,7 @@ export const AreaTable = DbcSchema({
 
 export const AreaTrigger = DbcSchema({
   id: n.int32(),
-  continentId: n.int32(),
+  mapId: n.int32(),
   ...Position,
   radius: n.float(),
   boxLength: n.float(),
@@ -68,8 +68,8 @@ export const AreaTrigger = DbcSchema({
 export const AuctionHouse = DbcSchema({
   id: n.int32(),
   factionId: n.int32(),
-  depositRate: n.int32(),
-  consignmentRate: n.int32(),
+  depositPercent: n.int32(),
+  cutPercent: n.int32(),
   ...LocalizedStringRef('name')
 });
 
@@ -176,7 +176,7 @@ export const ChrClasses = DbcSchema({
   petNameToken: StringRefSchema,
   ...LocalizedStringRef('name'),
   filename: StringRefSchema,
-  spellClassSet: n.int32(),
+  spellFamily: n.int32(),
   flags: n.int32()
 });
 
@@ -195,7 +195,7 @@ export const ChrRaces = DbcSchema({
   combatStunSpellId: n.int32(),
   resSicknessSpellId: n.int32(),
   splashSoundId: n.int32(),
-  startingTaxiNodes: n.int32(),
+  startingTaxiMask: n.int32(),
   clientFileString: StringRefSchema,
   cinematicSequenceId: n.int32(),
   ...LocalizedStringRef('name'),
@@ -273,8 +273,8 @@ export const CreatureModelData = DbcSchema({
   footstepShakeSize: n.int32(),
   deathThudShakeSize: n.int32(),
   soundId: n.int32(),
-  collisionHeight: n.float(),
-  mountHeight: n.float()
+  collisionWidth: n.float(),
+  collisionHeight: n.float()
 });
 
 export const CreatureSoundData = DbcSchema({
@@ -332,7 +332,7 @@ export const DurabilityCosts = DbcSchema({
 
 export const DurabilityQuality = DbcSchema({
   id: n.int32(),
-  data: n.float()
+  modifier: n.float()
 });
 
 export const Emotes = DbcSchema({
@@ -571,7 +571,7 @@ export const LFGDungeons = DbcSchema({
 
 export const Light = DbcSchema({
   id: n.int32(),
-  continentId: n.int32(),
+  mapId: n.int32(),
   ...Position,
   falloffStart: n.float(),
   falloffEnd: n.float(),
@@ -761,7 +761,7 @@ export const SkillLineAbility = DbcSchema({
   classMask: n.int32(),
   excludeRace: n.int32(),
   excludeClass: n.int32(),
-  minSkillLikeRank: n.int32(),
+  minSkillLineRank: n.int32(),
   supersededBySpellId: n.int32(),
   acquireMethod: n.int32(),
   trivialSkillLineRankHigh: n.int32(),
@@ -1048,17 +1048,17 @@ export const SpellVisual = DbcSchema({
   castKit: n.int32(),
   impactKit: n.int32(),
   stateKit: n.int32(),
-  stateDoneKit: n.int32(),
   channelKit: n.int32(),
   hasMissile: n.int32(),
   missileModel: n.int32(),
   missilePathType: n.int32(),
   missileDestinationAttachment: n.int32(),
   missileSound: n.int32(),
+  hasAreaEffect: n.int32(),
+  areaModel: n.int32(),
+  areaKit: n.int32(),
   animationEventSoundId: n.int32(),
-  flags: n.int32(),
-  casterImpactKit: n.int32(),
-  targetImpactKit: n.int32()
+  flags: n.int32()
 });
 
 export const SpellVisualEffectName = DbcSchema({
@@ -1141,7 +1141,7 @@ export const TalentTab = DbcSchema({
 
 export const TaxiNodes = DbcSchema({
   id: n.int32(),
-  continentId: n.int32(),
+  mapId: n.int32(),
   ...Position,
   ...LocalizedStringRef('name'),
   ...ArrayField('mountCreatureId', n.int32(), 2)
@@ -1158,7 +1158,7 @@ export const TaxiPathNode = DbcSchema({
   id: n.int32(),
   pathId: n.int32(),
   nodeIndex: n.int32(),
-  continentId: n.int32(),
+  mapId: n.int32(),
   ...Position,
   flags: n.int32(),
   delay: n.int32()
@@ -1220,7 +1220,7 @@ export const WMOAreaTable = DbcSchema({
 
 export const WorldMapArea = DbcSchema({
   id: n.int32(),
-  continentId: n.int32(),
+  mapId: n.int32(),
   areaId: n.int32(),
   name: StringRefSchema,
   locLeft: n.float(),
@@ -1231,7 +1231,7 @@ export const WorldMapArea = DbcSchema({
 
 export const WorldMapContinent = DbcSchema({
   id: n.int32(),
-  continentId: n.int32(),
+  mapId: n.int32(),
   left: n.int32(),
   right: n.int32(),
   top: n.int32(),
@@ -1264,7 +1264,7 @@ export const WorldMapOverlay = DbcSchema({
 
 export const WorldSafeLocs = DbcSchema({
   id: n.int32(),
-  continentId: n.int32(),
+  mapId: n.int32(),
   ...Position,
   ...LocalizedStringRef('name')
 });
