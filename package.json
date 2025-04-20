@@ -17,7 +17,6 @@
       "types": "./dist/index.d.ts"
     }
   },
-  "bin": "./dist/index.cjs",
   "files": [
     "dist/**/*"
   ],
