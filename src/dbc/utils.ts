@@ -23,8 +23,8 @@ const Languages = [
   'koKR',
   'frFR',
   'deDE',
-  'enCN',
-  'enTW',
+  'zhCN',
+  'zhTW',
   'esES',
   'ptPT'
 ] as const;
