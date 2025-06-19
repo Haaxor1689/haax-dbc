@@ -24,7 +24,7 @@ const Languages = [
   'frFR',
   'deDE',
   'zhCN',
-  'zhTW',
+  'ruRU',
   'esES',
   'ptPT'
 ] as const;
