@@ -22,4 +22,5 @@ export const dataToCsv = (data: Record<string, unknown>[]) =>
     cast: { number: v => (!Number.isInteger(v) ? v.toFixed(2) : v.toString()) }
   });
 
-export const csvToData = (csv: string) => parse(csv);
+export const csvToData = (csv: string) =>
+  parse(csv, { cast: true, columns: true });
