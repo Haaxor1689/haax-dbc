@@ -81,26 +81,19 @@ export const DbcSchema = <T extends n.NilRawShape>(
     .transform(
       ctx => {
         const { records, stringBlock } = ctx.value;
-
         const decoder = new TextDecoder();
-        const strings = new Map<number, string>();
-        let current = 0;
-        while (current < stringBlock.length) {
-          const end = stringBlock.indexOf(0, current);
-          strings.set(
-            current,
-            decoder.decode(
-              stringBlock.subarray(current, end === -1 ? undefined : end)
-            )
-          );
-          current = end + 1;
+        for (let i = 0; i < records.length; i++) {
+          for (const key in records[i]) {
+            if (!records[i].hasOwnProperty(key)) continue;
+            const v = records[i][key];
+            if (!isStringRef(v)) continue;
+            const end = stringBlock.indexOf(0, v.offset);
+            (records[i][key] as unknown) = decoder.decode(
+              stringBlock.subarray(v.offset, end === -1 ? undefined : end)
+            );
+          }
         }
-        return records.map(r =>
-          mapValues(r, v => {
-            if (!isStringRef(v)) return v;
-            return strings.get(v.offset) ?? '';
-          })
-        );
+        return records;
       },
       ctx => {
         // TODO: Optimize this

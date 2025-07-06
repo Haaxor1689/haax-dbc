@@ -8,6 +8,16 @@ import { csvToDbc, dbcToCsv } from './converter';
 
 import pkg from '../package.json';
 
+const pad = (v: number, p = 2) => v.toString().padStart(p, '0');
+const getTimeElapsed = (startDate: Date, endDate = new Date()) => {
+  let ms = endDate.getTime() - startDate.getTime();
+  const m = Math.floor(ms / (1000 * 60));
+  ms %= 1000 * 60;
+  const s = Math.floor(ms / 1000);
+  ms %= 1000;
+  return `${m ? `${pad(m)}:` : ''}${pad(s)}.${pad(ms, 3)}`;
+};
+
 // Set up command-line interface with commander
 program
   .name('haax-dbc')
@@ -74,4 +84,38 @@ const run = async (filePaths: string[]) =>
     })
   );
 
-run(files.map(p => normalize(p)));
+const start = new Date();
+await run(files.map(p => normalize(p)));
+console.log(`Done in ${getTimeElapsed(start)}`);
+
+// Memory allocation profiling
+if (process.env.NODE_ENV !== 'development') process.exit(0);
+const { heapStats } = await import('bun:jsc');
+const current = heapStats();
+
+const nestedCompare = <
+  T extends Record<string, number | Record<string, number>>
+>(
+  a: T,
+  b: T
+): T =>
+  Object.fromEntries(
+    Object.entries(a)
+      .map(([k, v]) => {
+        if (typeof v === 'object') {
+          const r = nestedCompare(v, b[k] as never);
+          if (Object.keys(r).length === 0) return undefined;
+          return [k, r];
+        }
+        if (v === b[k]) return undefined;
+        const diff = Math.floor((1 - (b[k] as never) / v) * 100);
+        if (diff === 0) return undefined;
+        return [k, `${v} (${diff}%)`];
+      })
+      .filter(v => v !== undefined)
+  );
+const previous = await Bun.file('heap-stats.json')
+  .json()
+  .catch(() => undefined);
+if (previous) console.log(nestedCompare(current, previous));
+await Bun.write('heap-stats.json', JSON.stringify(current));
