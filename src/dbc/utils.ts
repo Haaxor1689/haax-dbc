@@ -1,6 +1,19 @@
 import { n } from '@haaxor1689/nil';
 
-import { mapValues } from '../utils';
+const mapValues = <T, U>(
+  obj: Record<string, T>,
+  iteratee: (value: T, key: string, obj: Record<string, T>) => U
+) => {
+  const result: Record<string, U> = {};
+
+  for (const key in obj) {
+    if (obj.hasOwnProperty(key)) {
+      result[key] = iteratee(obj[key], key, obj);
+    }
+  }
+
+  return result;
+};
 
 type StringRef = { _t: 'str'; offset: number };
 
