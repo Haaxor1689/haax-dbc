@@ -24,6 +24,7 @@ program
   .description('Convert between DBC and CSV files for World of Warcraft')
   .version(pkg.version)
   .argument('[files...]', 'DBC or CSV files to convert')
+  .option('--profile', 'Enable profiling mode', false)
   .addHelpText(
     'after',
     `
@@ -36,6 +37,7 @@ Examples:
   .parse();
 
 const files = program.args;
+const { profile } = program.opts();
 
 if (files.length === 0) program.help();
 
@@ -89,7 +91,7 @@ await run(files.map(p => normalize(p)));
 console.log(`Done in ${getTimeElapsed(start)}`);
 
 // Memory allocation profiling
-if (process.env.NODE_ENV !== 'development') process.exit(0);
+if (!profile) process.exit(0);
 const { heapStats } = await import('bun:jsc');
 const current = heapStats();
 
