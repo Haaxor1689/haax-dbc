@@ -560,6 +560,12 @@ export const Languages = DbcSchema({
   ...LocalizedStringRef('name')
 });
 
+export const LanguageWords = DbcSchema({
+  id: n.int32(),
+  languageId: n.int32(),
+  word: StringRefSchema
+});
+
 export const LFGDungeons = DbcSchema({
   id: n.int32(),
   ...LocalizedStringRef('name'),
