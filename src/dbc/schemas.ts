@@ -676,7 +676,8 @@ export const Map = DbcSchema({
   ...LocalizedStringRef('description2'),
   loadingScreenId: n.int32(),
   raidOffset: n.int32(),
-  ...ArrayField('unknown_', n.int32(), 2)
+  canGroupQueue: n.int32(),
+  unknown_4: n.int32()
 });
 
 export const NameGen = DbcSchema({
