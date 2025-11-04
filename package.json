@@ -1,22 +1,24 @@
 {
   "name": "haax-dbc",
-  "version": "1.3.0",
+  "version": "1.3.1",
   "author": "Haaxor1689",
   "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/Haaxor1689/haax-dbc.git"
   },
-  "module": "./dist/dbc/index.mjs",
-  "types": "./dist/dbc/index.d.ts",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/dbc/index.mjs",
-      "types": "./dist/dbc/index.d.ts"
+      "require": "./dist/index.js",
+      "import": "./dist/index.mjs",
+      "types": "./dist/index.d.ts"
     }
   },
   "bin": {
-    "haax-dbc": "./dist/index.mjs"
+    "haax-dbc": "./dist/cli.mjs"
   },
   "files": [
     "dist/**/*"
