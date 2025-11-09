@@ -6,7 +6,7 @@ export const dataToCsv = (data: Record<string, unknown>[]) =>
     header: true,
     cast: {
       number: v => (!Number.isInteger(v) ? v.toFixed(2) : v.toString()),
-      string: v => v.replaceAll(/\n/g, '\\n')
+      string: v => v.replaceAll(/\r/g, '').replaceAll(/\n/g, '\\n')
     }
   });
 
